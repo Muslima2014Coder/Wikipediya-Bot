@@ -1,15 +1,33 @@
-from-"telegram import Update"
-from-"telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes"
+import asyncio
+import logging
+import sys,os
 
-TOKEN = "8696134965:AAHmDPP0hh_rq_RaLcnDrSPHrX2hgRhSmck"
-async def start(update: "Update, context: ContextTypes.DEFAULT_TYPE"):
-    await update.message.reply_text("Salom Muslima")
+from aiogram import Bot, Dispatcher, html
+from aiogram.client.default import DefaultBotProperties
+from aiogram.enums import ParseMode
+from aiogram.filters import CommandStart
+from aiogram.types import Message
+from dotenv import load_dotenv
+load_dotenv()
+TOKEN = os.getenv("Token")
+dp = Dispatcher()
 
-def main():
-    app = "ApplicationBuilder"().token(TOKEN).build()
-    app.add_handler("CommandHandler"("start"))
+@dp.message(CommandStart())
+async def command_start_handler(message: Message) -> None:
+    await message.answer(f"Salom, {html.bold(message.from_user.full_name)}!")
 
-    print("salom muslima...")
-    app.run_pulling()
-if __name__ == "__main__"     :
-    main()
+@dp.message()
+async def echo_handler(message: Message) -> None:
+    try:
+        await message.answer(f"{message.text}")
+    except TypeError:
+        await message.answer("Nice try!")
+
+async def main() -> None:
+    bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+    await dp.start_polling(bot)
+
+
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO, stream=sys.stdout)
+    asyncio.run(main())
